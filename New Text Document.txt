@@ -1,0 +1,394 @@
+ <%@ Page Language="VB" debug=true  %>
+<%@ Import Namespace="System.Data" %>
+<%@ Import Namespace="System.Data.OleDb" %>
+
+<HTML>
+<HEAD>
+<title>database</title>
+<script language="vb" runat="server">
+    Dim objConn As OleDbConnection
+    Dim strSQL As String
+    Sub Page_Load(ByVal sender As Object, ByVal e As EventArgs)
+        If Not Page.IsPostBack Then
+            Dim sql, dbcomm, dbread, dbwrite
+            objConn = New OleDbConnection("Provider=Microsoft.Jet.OLEDB.4.0; Data Source=" & Server.MapPath("satinalma.mdb") & ";")
+            objConn.Open()
+            
+            sql = "SELECT * FROM tbl_sifmain_gecici where sifno='" & Session("sifgecicino") & "'"
+            dbcomm = New OleDbCommand(sql, objConn)
+            dbread = dbcomm.ExecuteReader()
+            DataList1.DataSource = dbread
+            DataList1.DataBind()
+            dbread.Close()
+            objConn.Close()
+            If Session("sifgecicino") Is Nothing Then
+                Response.Redirect("sifgiris.aspx")
+            End If
+            If Request.QueryString("delete") <> "" Then
+                strSQL = "Delete from tbl_sifdetay_gecici where ID = " & Request.QueryString("delete") & " "
+                objConn = New OleDbConnection("Provider=Microsoft.Jet.OLEDB.4.0; Data Source=" & Server.MapPath("satinalma.mdb") & ";")
+                objConn.Open()
+                Dim objCommand As OleDbCommand = New OleDbCommand(strSQL, objConn)
+                objCommand.ExecuteNonQuery()
+                objCommand.Connection.Close()
+                objConn.Close()
+            End If
+            objConn = New OleDbConnection("Provider=Microsoft.Jet.OLEDB.4.0; Data Source=" & Server.MapPath("satinalma.mdb") & ";")
+            objConn.Open()
+            
+            Dim ds As DataSet
+            Dim myda As OleDbDataAdapter = New OleDbDataAdapter("Select * from tbl_stok ", objConn)
+            ds = New DataSet
+            myda.Fill(ds, "AllTables")
+            DropDownStok.DataSource = ds
+            DropDownStok.DataSource = ds.Tables(0)
+            DropDownStok.DataTextField = ds.Tables(0).Columns("name").ColumnName.ToString()
+            DropDownStok.DataValueField = ds.Tables(0).Columns("code").ColumnName.ToString()
+            DropDownStok.DataBind()
+                       
+            myda = New OleDbDataAdapter("Select * from tbl_birim ", objConn)
+            ds = New DataSet
+            myda.Fill(ds, "AllTables")
+            DropDownBirim.DataSource = ds
+            DropDownBirim.DataSource = ds.Tables(0)
+            DropDownBirim.DataTextField = ds.Tables(0).Columns("name").ColumnName.ToString()
+            DropDownBirim.DataValueField = ds.Tables(0).Columns("code").ColumnName.ToString()
+            DropDownBirim.DataBind()
+            objConn.Close()
+        End If
+
+    End Sub
+    
+    Sub LinkButton_Command(ByVal sender As Object, ByVal e As CommandEventArgs)
+        Response.Write("DDB:" & e.CommandArgument.ToString())
+    End Sub
+
+    
+    Protected Sub Button1_Click(ByVal sender As Object, ByVal e As System.EventArgs)
+       objConn = New OleDbConnection("Provider=Microsoft.Jet.OLEDB.4.0; Data Source=" & Server.MapPath("satinalma.mdb") & ";")
+       objConn.Open()     
+        strSQL = ""
+        strSQL = strSQL & "INSERT INTO tbl_sifdetay_gecici "
+        strSQL = strSQL & "(sifno,createdate,malzemekod,talepmiktar,birim,onaymiktar,acilmi) " & vbCrLf
+        strSQL = strSQL & "VALUES ("
+        strSQL = strSQL & "'" & Session("sifgecicino") & "',"
+        strSQL = strSQL & "'" & System.DateTime.Now.ToShortDateString() & "',"
+        strSQL = strSQL & "'" & Trim(DropDownStok.SelectedItem.Value) & "',"
+        strSQL = strSQL & "'" & Trim(txttalepmiktar.Text) & "',"
+        strSQL = strSQL & "'" & Trim(DropDownBirim.SelectedItem.Value) & "',"
+        strSQL = strSQL & "'" & Trim(txtonaymiktar.Text) & "',"
+        strSQL = strSQL & "'" & Trim(DropDownAcilmi.SelectedItem.Value) & "'"
+        strSQL = strSQL & ");"
+       
+        Dim objCommand As OleDbCommand = New OleDbCommand(strSQL, objConn)
+        objCommand.ExecuteNonQuery()
+        objCommand.Connection.Close()
+        objConn.Close()   
+        Response.Redirect("sifgirisdetay.aspx")
+    End Sub
+    
+    Protected Sub Button2_Click(ByVal sender As Object, ByVal e As System.EventArgs)
+    
+        strSQL = "UPDATE [tbl_sifdetay_gecici] SET [malzemekod] =' " & DropDownStok.SelectedItem.Value & " ', " & _
+                       "[talepmiktar] =  12 ,[birim] ='1', " & _
+                       "[onaymiktar] = 15 ,[acilmi] ='E' " & _
+               "WHERE [ID] =  " & Request.QueryString("update") & "  "
+        objConn = New OleDbConnection("Provider=Microsoft.Jet.OLEDB.4.0; Data Source=" & Server.MapPath("satinalma.mdb") & ";")
+        objConn.Open()
+        Dim objCommand As OleDbCommand = New OleDbCommand(strSQL, objConn)
+        objCommand.ExecuteNonQuery()
+        objCommand.Connection.Close()
+        objConn.Close()
+    End Sub
+  
+    Public Function firmaad(ByVal ID As String) As String
+        objConn = New OleDbConnection("Provider=Microsoft.Jet.OLEDB.4.0; Data Source=" & Server.MapPath("satinalma.mdb") & ";")
+        objConn.Open()
+        strSQL = "SELECT * FROM tbl_supplier where code='" & ID & "'"
+        Dim objCmd As New OleDbCommand(strSQL, objConn)
+        Dim objDR As OleDbDataReader
+        objDR = objCmd.ExecuteReader()
+        objDR.Read()
+        Return objDR("name")
+    End Function
+    Public Function departmentad(ByVal ID As String) As String
+        objConn = New OleDbConnection("Provider=Microsoft.Jet.OLEDB.4.0; Data Source=" & Server.MapPath("satinalma.mdb") & ";")
+        objConn.Open()
+        strSQL = "SELECT * FROM tbl_department where code='" & ID & "'"
+        Dim objCmd As New OleDbCommand(strSQL, objConn)
+        Dim objDR As OleDbDataReader
+        objDR = objCmd.ExecuteReader()
+        objDR.Read()
+        Return objDR("name")
+    End Function
+    Public Function kisiad(ByVal ID As String) As String
+        objConn = New OleDbConnection("Provider=Microsoft.Jet.OLEDB.4.0; Data Source=" & Server.MapPath("satinalma.mdb") & ";")
+        objConn.Open()
+        strSQL = "SELECT * FROM tbl_user where user_name='" & ID & "'"
+        Dim objCmd As New OleDbCommand(strSQL, objConn)
+        Dim objDR As OleDbDataReader
+        objDR = objCmd.ExecuteReader()
+        objDR.Read()
+        Return objDR("ad_soyad")
+    End Function
+    Public Function stokad(ByVal ID As String) As String
+        objConn = New OleDbConnection("Provider=Microsoft.Jet.OLEDB.4.0; Data Source=" & Server.MapPath("satinalma.mdb") & ";")
+        objConn.Open()
+        strSQL = "SELECT * FROM tbl_stok where code='" & ID & "'"
+        Dim objCmd As New OleDbCommand(strSQL, objConn)
+        Dim objDR As OleDbDataReader
+        objDR = objCmd.ExecuteReader()
+        objDR.Read()
+        Return objDR("name")
+    End Function
+    Public Function birimad(ByVal ID As String) As String
+        objConn = New OleDbConnection("Provider=Microsoft.Jet.OLEDB.4.0; Data Source=" & Server.MapPath("satinalma.mdb") & ";")
+        objConn.Open()
+        strSQL = "SELECT * FROM tbl_birim where code='" & ID & "'"
+        Dim objCmd As New OleDbCommand(strSQL, objConn)
+        Dim objDR As OleDbDataReader
+        objDR = objCmd.ExecuteReader()
+        objDR.Read()
+        Return objDR("name")
+    End Function
+   
+</script>	 
+</HEAD>
+<body>
+   <style type="text/css">
+            .style1
+            {
+                width: 100%;
+            }
+            .style2
+            {
+                color: #FFFFFF;
+                font-family: Tahoma;
+                font-weight: bold;
+                font-size: x-small;
+            }
+            .style4
+            {
+                font-family: Tahoma;
+                font-size: x-small;
+                background-color: #99CCFF;
+            }
+            .style8
+            {
+                font-family: Tahoma;
+                font-size: x-small;
+                font-weight: bold;
+                background-color: #FFCC66;
+            }
+            .style11
+            {
+                background-color: #EBEBEB;
+                font-family: Tahoma;
+                font-size: xx-small;
+                font-weight: bold;
+            }
+        </style>
+ <form id="form1" method="post" runat="server">
+    <div>
+    <%   
+    Dim onaydurum As String
+    Dim sifdurum As String
+    objConn = New OleDbConnection("Provider=Microsoft.Jet.OLEDB.4.0; Data Source=" & Server.MapPath("satinalma.mdb") & ";")
+    objConn.Open() 
+        
+    strSQL = "SELECT * FROM tbl_sifmain_gecici where sifno='" & Session("sifgecicino") & "'"
+    Dim objCmd As New OleDbCommand(strSQL, objConn)
+    Dim objDR As OleDbDataReader
+    objDR = objCmd.ExecuteReader(System.Data.CommandBehavior.CloseConnection)
+    objDR.Read()
+    If objDR("status") = 0 Then
+        sifdurum = "AÇIK"
+    Else
+        sifdurum = "KAPALI"
+    End If
+    If objDR("onaydurum") = 0 Then
+        onaydurum = "ONAYDA"
+    ElseIf objDR("onaydurum") = 1 Then
+        onaydurum = "DEPARTMAN MÜDÜRÜ ONAYLADI"
+    ElseIf objDR("onaydurum") = 2 Then
+        onaydurum = "SATINALMADA"
+    End If
+   
+    strSQL = "SELECT * FROM tbl_sifdetay_gecici where sifno='" & Session("sifgecicino") & "'"
+    objCmd = New OleDbCommand(strSQL, objConn)
+    Dim tbl_sifdetay As OleDbDataReader
+    tbl_sifdetay = objCmd.ExecuteReader(System.Data.CommandBehavior.CloseConnection)    
+ 
+%>
+<table align="center" bgcolor="Gainsboro" cellpadding="1" cellspacing="1" class="style1">
+    <tr>
+        <td>
+            <table align="center" class="style1" border="1" cellpadding="1" cellspacing="1">
+                <tr>
+                    <td class="style8">
+                        SÝF NO:</td>
+                    <td class="style8">
+                        SÝF&nbsp; TARÝHÝ:</td>
+                    <td class="style8">
+                        DEPARTMAN:</td>
+                    <td class="style8">
+                        KÝÞÝ:</td>
+                </tr>
+                <tr>
+                    <td class="style11">
+                         <%=Session("sifgecicino")%></td>
+                    <td class="style11">
+                         <%=objDR("createdate")%></td>
+                    <td class="style11">
+                        <%=departmentad(objDR("department"))%></td>
+                    <td class="style11">
+                        <%=kisiad(objDR("username"))%></td>
+                </tr>
+                <tr>
+                    <td class="style8">
+                        TALEP NO:</td>
+                    <td class="style8">
+                        TALEP TARÝHÝ:</td>
+                    <td class="style8">
+                        TALEP EDÝLEN FÝRMA:</td>
+                    <td class="style8">
+                        DURUM:</td>
+                </tr>
+                <tr>
+                    <td class="style11">
+                        <%=objDR("talepno")%></td>
+                    <td class="style11">
+                        <%=objDR("taleptarih")%></td>
+                    <td class="style11">
+                        <%=firmaad(objDR("tercihfirma"))%></td>
+                    <td class="style11">
+                       <%=sifdurum%></td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <table align="center" bgcolor="White" class="style1" cellpadding="1" cellspacing="1" border="1">
+                <tr bgcolor="#666666">
+                    <td class="style2">
+                        Malzeme</td>
+                    <td class="style2">
+                        Miktar</td>
+                    <td class="style2">
+                        Birim</td>
+                    <td class="style2">
+                        Acil Mi?</td>
+                    <td class="style2">
+                        Onaylanan Miktar</td>
+                    <td class="style2">
+                        Ýþlem</td>
+                </tr>
+                 <% While tbl_sifdetay.Read()%>
+                 <tr>
+                   <td class="style4"><%=stokad(tbl_sifdetay("malzemekod"))%></td>
+                    <td class="style4"><%=tbl_sifdetay("talepmiktar")%></td>
+                     <td class="style4"><%=birimad(tbl_sifdetay("birim"))%></td>
+                      <td class="style4"><%=tbl_sifdetay("acilmi")%></td>
+                       <td class="style4"><%=tbl_sifdetay("onaymiktar")%></td>
+                        <td style="font-weight: 700; color: #FFFFFF; background-color: #003366">
+                        <a href="sifgirisdetay.aspx?delete=<%=tbl_sifdetay("ID")%>"><font face=tahoma size=2 color=yellow>Sil</font></a>
+ 
+</td>
+                </tr>
+                <%End While%>
+                <tr>
+                    <td>                  
+                        <asp:DropDownList ID="DropDownStok" runat="server" Width="192px"></asp:DropDownList>
+                    </td>
+                    <td>
+                        <asp:TextBox ID="txttalepmiktar" onkeypress="onlyDigits(this,event)" runat="server">0</asp:TextBox>
+                    </td>
+                    <td>
+                        <asp:DropDownList ID="DropDownBirim" runat="server">
+                        </asp:DropDownList>
+                    </td>
+                    <td><asp:DropDownList id="DropDownAcilmi" runat="server">
+                            <asp:ListItem>E</asp:ListItem>
+                            <asp:ListItem>H</asp:ListItem>                            
+                        </asp:DropDownList>                        
+                    </td>
+                    <td>
+                        <asp:TextBox ID="txtonaymiktar" onkeypress="onlyDigits(this,event)" runat="server">0</asp:TextBox>
+                    </td>
+                    <td>
+                        <asp:Button ID="Button1" runat="server" onclick="Button1_Click" Text="EKLE" 
+                            Height="20px" style="font-weight: 700" Width="48px" />
+                    </td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <table class="style1" border="1" cellpadding="1" cellspacing="1" frame="border">
+                <tr>
+                    <td class="style8">
+                        AÇIKLAMA:</td>
+                    <td class="style8">
+                        ONAY:</td>
+                </tr>
+                <tr>
+                    <td class="style11">
+                        <%=objDR("aciklama")%></td>
+                    <td class="style11">
+                        <%=onaydurum%></td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+</table>
+<%  objConn.Close()%>
+  
+        <asp:Repeater ID="DataList1" runat="server">
+            <HeaderTemplate>
+                <table border="1" width="100%">
+                    <tr bgcolor="#b0c4de">
+                       <th class="style2">
+                        Malzeme</th>
+                    <th class="style2">
+                        Miktar</th>
+                    <th class="style2">
+                        Birim</th>
+                    <th class="style2">
+                        Acil Mi?</th>
+                    <th class="style2">
+                        Onaylanan Miktar</th>
+                    <th class="style2">
+                        Ýþlem</th>
+                    </tr>
+               </table>
+            </HeaderTemplate>
+            <ItemTemplate>
+             <table border="1" width="100%">
+                <tr bgcolor="#f0f0f0">
+                    <th>
+                        <%#Container.DataItem(0)%> 
+                    </th>
+                    <th>
+                        <%#Container.DataItem(1)%> 
+                    </th>
+                    <th>
+                        <%#Container.DataItem(2)%> 
+                    </th>
+                    <th>
+                        <%#Container.DataItem(3)%> 
+                    </th>
+                    <th>
+                        <%#Container.DataItem(4)%> 
+                    </th>
+                    <th>
+                       
+                    </th>
+                </tr>
+                  </table>
+            </ItemTemplate>      
+        </asp:Repeater>
+    </form>
+</body>
+</HTML>

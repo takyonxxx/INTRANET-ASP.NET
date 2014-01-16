@@ -1,0 +1,1 @@
+csc /out:uploadac.dll /t:library /r:System.dll;System.Web.dll;System.Data.dll;System.Drawing.dll *.cs

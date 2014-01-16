@@ -1,0 +1,35 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 10.00
+# Visual Studio 2008
+Project("{E24C65DC-7377-472B-9ABA-BC803B73C61A}") = "wwwroot", ".", "{F924FC76-9607-4EEA-B932-DE720EA005A1}"
+	ProjectSection(WebsiteProperties) = preProject
+		TargetFramework = "2.0"
+		Debug.AspNetCompiler.VirtualPath = "/intranet"
+		Debug.AspNetCompiler.PhysicalPath = "..\..\..\..\..\..\intranet\"
+		Debug.AspNetCompiler.TargetPath = "PrecompiledWeb\intranet\"
+		Debug.AspNetCompiler.Updateable = "true"
+		Debug.AspNetCompiler.ForceOverwrite = "true"
+		Debug.AspNetCompiler.FixedNames = "false"
+		Debug.AspNetCompiler.Debug = "True"
+		Release.AspNetCompiler.VirtualPath = "/intranet"
+		Release.AspNetCompiler.PhysicalPath = "..\..\..\..\..\..\intranet\"
+		Release.AspNetCompiler.TargetPath = "PrecompiledWeb\intranet\"
+		Release.AspNetCompiler.Updateable = "true"
+		Release.AspNetCompiler.ForceOverwrite = "true"
+		Release.AspNetCompiler.FixedNames = "false"
+		Release.AspNetCompiler.Debug = "False"
+		VWDPort = "60683"
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|.NET = Debug|.NET
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{F924FC76-9607-4EEA-B932-DE720EA005A1}.Debug|.NET.ActiveCfg = Debug|.NET
+		{F924FC76-9607-4EEA-B932-DE720EA005A1}.Debug|.NET.Build.0 = Debug|.NET
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
